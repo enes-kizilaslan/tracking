@@ -7,8 +7,7 @@ from utils import (
     load_model_performances,
     prepare_input_data,
     make_predictions,
-    load_expected_answers,
-    load_question_texts
+    load_expected_answers
 )
 
 # Sabit 95 soruluk liste
