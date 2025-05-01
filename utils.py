@@ -141,15 +141,16 @@ def make_predictions(
             'Q242','Q243','Q249','Q252','Q253'
         ])
         
+        # Bu kategoriye ait tüm modellerin kullandığı soruların birleşimi
         combined_question_pool = set()
         for model_name in model_names:
             combined_question_pool.update(feature_lists.get(model_name, []))
         
+        # Bu havuzdan kullanıcıya sorulmuş olanları filtrele (cevap verdiği sorular)
         incorrect_answers_detailed = []
         for q in combined_question_pool:
-            if q not in STATIC_QUESTIONS:
-                continue
-        
+            if q not in answers:
+                continue  # Bu soru kullanıcıya hiç gösterilmemiş
             expected = expected_answers.get(q)
             given = answers.get(q)
             if expected is not None and given is not None and expected != given:
@@ -159,6 +160,7 @@ def make_predictions(
                     "beklenen": expected,
                     "verilen": given
                 })
+
 
         
         summary[label] = {
