@@ -46,8 +46,8 @@ def load_question_texts_local():
         escapechar='\\'
     )
     df.columns = df.columns.str.strip().str.replace('"', '').str.lower()
-    return df["soru"]
-
+    df = df[df["soru no"].isin(get_static_questions())]  # ← SADECE 95 soruyu filtrele
+    return dict(zip(df["soru no"], df["soru"]))
 
 question_texts = load_question_texts_local()
 
