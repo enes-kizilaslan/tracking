@@ -169,5 +169,15 @@ def make_predictions(
             "incorrect_answers_detailed": incorrect_answers_detailed
         }
 
+    print("\n\n===============================")
+    print("TEST: Hatalı cevaplanan tüm sorular:")
+    for label, group in summary.items():
+        print(f"--- {label} ---")
+        if not group["incorrect_answers_detailed"]:
+            print("YOK")
+        for s in group["incorrect_answers_detailed"]:
+            print(f"{s['soru_kodu']}: Beklenen={s['beklenen']}, Verilen={s['verilen']}")
+
+
     return summary
 
