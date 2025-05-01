@@ -32,6 +32,23 @@ if "page" not in st.session_state:
 
 questions = get_static_questions()
 
+# Soru metinlerini yükle
+@st.cache_data
+def load_question_texts_local():
+    df = pd.read_csv(
+        "SorularFull.csv",
+        sep=';',
+        encoding='windows-1254',
+        engine='python',
+        quoting=3,
+        quotechar=None,
+        escapechar='\\'
+    )
+    df.columns = df.columns.str.strip().str.replace('"', '')
+    return dict(zip(df["Soru no"], df["Soru"]))
+
+question_texts = load_question_texts_local()
+
 if st.session_state.page == "form":
     st.subheader("Lütfen aşağıdaki 95 soruyu cevaplayın")
 
@@ -42,7 +59,13 @@ if st.session_state.page == "form":
     with st.form("questionnaire"):
         answers = {}
         for q in questions:
-            answers[q] = st.radio(q, ["Evet", "Hayır"], key=q, index=0 if st.session_state.get(q) == "Evet" else 1)
+            label = question_texts.get(q, q)
+            answers[q] = st.radio(
+                label,
+                ["Evet", "Hayır"],
+                key=q,
+                index=0 if st.session_state.get(q) == "Evet" else 1
+            )
         submit = st.form_submit_button("Tahmin Yap")
 
     if submit:
@@ -74,7 +97,8 @@ elif st.session_state.page == "results":
         if detail["final_prediction"] == 1 and detail["wrong_questions"]:
             with st.expander("❌ Farklı cevaplanan kritik soruları gör"):
                 for q in detail["wrong_questions"]:
-                    st.write(f"- {q}: **{st.session_state.answers.get(q)}**")
+                    label = question_texts.get(q, q)
+                    st.write(f"- {label}: **{st.session_state.answers.get(q)}**")
 
     if st.button("⬅️ Başa Dön"):
         st.session_state.page = "form"
