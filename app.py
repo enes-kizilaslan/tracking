@@ -101,9 +101,11 @@ elif st.session_state.page == "results":
             st.write("Debug:", detail.get("incorrect_answers_detailed"))
             with st.expander("🧩 Beklenenden farklı cevaplanan sorular"):
                 for item in detail["incorrect_answers_detailed"]:
-                    soru_metni = question_texts.get(item["soru_kodu"], item["soru_kodu"])
+                    soru_kodu = item["soru_kodu"]
+                    soru_metni = question_texts.get(soru_kodu, soru_kodu)
                     st.markdown(f"- **{soru_metni}**  \n"
-                                f"Beklenen: `{item['beklenen']}` | Verilen: `{item['verilen']}`")
+                                f"*Beklenen Cevap:* `{item['beklenen']}`   |   *Verilen Cevap:* `{item['verilen']}`")
+
 
         if detail["final_prediction"] == 1 and detail["wrong_questions"]:
             with st.expander("❌ Farklı cevaplanan kritik soruları gör"):
