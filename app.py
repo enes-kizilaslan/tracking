@@ -32,22 +32,7 @@ if "page" not in st.session_state:
     st.session_state.page = "form"
 
 questions = get_static_questions()
-
-# Soru metinlerini yükle (uyumlu kolon isimleri ile)
-def load_question_texts_local():
-    df = pd.read_csv(
-        "SorularFull.csv",
-        sep=';',
-        encoding='windows-1254',
-        engine='python',
-        quoting=3,
-        quotechar=None,
-        escapechar='\\'
-    )
-    df.columns = df.columns.str.strip()  # Sütun isimlerini temizle
-    return dict(zip(df["Soru no"], df["Soru"]))
-
-question_texts = load_question_texts_local()
+question_texts = load_question_texts()
 
 if st.session_state.page == "form":
     st.subheader("Lütfen aşağıdaki 95 soruyu cevaplayın")
@@ -59,13 +44,7 @@ if st.session_state.page == "form":
     with st.form("questionnaire"):
         answers = {}
         for q in questions:
-            label = question_texts.get(q, q)  # Eğer metin bulunamazsa Qxx göster
-            answers[q] = st.radio(
-                label,
-                ["Evet", "Hayır"],
-                key=q,
-                index=0 if st.session_state.get(q) == "Evet" else 1
-            )
+            answers[q] = st.radio(q, ["Evet", "Hayır"], key=q, index=0 if st.session_state.get(q) == "Evet" else 1)
         submit = st.form_submit_button("Tahmin Yap")
 
     if submit:
