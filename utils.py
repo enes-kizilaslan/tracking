@@ -129,7 +129,11 @@ def make_predictions(
             "nonrisk_weight_sum": nonrisk_weight_sum,
             "risk_percentage": risk_percentage,
             "final_prediction": final_pred,
-            "wrong_questions": list(set(wrong_questions_all))  # Aynı sorunun tekrar etmemesi için set kullanıldı.
+            "wrong_questions": list(set(wrong_questions_all)),
+            "total_models": len(model_names),
+            "total_positive": sum(1 for model_name in model_names
+                                  if model_name in input_data and
+                                     models[model_name].predict_proba(input_data[model_name])[0][1] >= 0.5)
         }
 
     return summary
