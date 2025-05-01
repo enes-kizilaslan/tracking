@@ -14,6 +14,19 @@ def load_models() -> Dict[str, Any]:
             models[model_name] = joblib.load(model_path)
     return models
 
+def load_question_texts(csv_file: str = "SorularFull.csv") -> Dict[str, str]:
+    df = pd.read_csv(
+        csv_file,
+        sep=';',
+        encoding='windows-1254',
+        engine='python',
+        quoting=csv.QUOTE_NONE,
+        quotechar=None,
+        escapechar='\\'
+    )
+    return dict(zip(df["Soru no"], df["Soru"]))
+
+
 def load_feature_lists(feature_file: str = FEATURE_FILE) -> Dict[str, List[str]]:
     df = pd.read_excel(feature_file)
     return {
