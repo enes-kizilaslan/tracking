@@ -178,6 +178,8 @@ def make_predictions(
                                   if model_name in input_data and
                                      models[model_name].predict_proba(input_data[model_name])[0][1] >= 0.5),
             "incorrect_answers_detailed": incorrect_answers_detailed
+            "total_question_count": len(combined_question_pool),
+            "incorrect_count": len(incorrect_answers_detailed),
         }
 
     print("\n\n===============================")
