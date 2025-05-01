@@ -23,6 +23,7 @@ def get_static_questions():
         'Q242','Q243','Q249','Q252','Q253'
     ]
 
+# Sayfa yapısı
 st.set_page_config(page_title="Nörogelişimsel Bozukluk Tahmin Sistemi", layout="wide")
 st.title("Nörogelişimsel Bozukluk Tahmin Sistemi")
 
@@ -41,7 +42,7 @@ if st.session_state.page == "form":
     with st.form("questionnaire"):
         answers = {}
         for q in questions:
-            answers[q] = st.radio(q, ["Evet", "Hayır"], key=q, index=0 if st.session_state.get(q)=="Evet" else 1)
+            answers[q] = st.radio(q, ["Evet", "Hayır"], key=q, index=0 if st.session_state.get(q) == "Evet" else 1)
         submit = st.form_submit_button("Tahmin Yap")
 
     if submit:
