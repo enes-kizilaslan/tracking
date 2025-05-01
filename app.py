@@ -44,6 +44,7 @@ def load_question_texts_local():
         quotechar=None,
         escapechar='\\'
     )
+    df.columns = df.columns.str.strip()  # Baş-son boşlukları sil
     return dict(zip(df["Soru no"], df["Soru"]))
 
 question_texts = load_question_texts_local()
