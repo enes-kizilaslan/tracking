@@ -1,14 +1,6 @@
 import streamlit as st
 import random
 import pandas as pd
-from utils import (
-    load_models,
-    load_feature_lists,
-    load_model_performances,
-    prepare_input_data,
-    make_predictions,
-    load_expected_answers
-)
 
 # Sabit 95 soruluk liste
 def get_static_questions():
