@@ -106,12 +106,6 @@ elif st.session_state.page == "results":
                                 f"*Beklenen Cevap:* `{item['beklenen']}`   |   *Verilen Cevap:* `{item['verilen']}`")
 
 
-        if detail["final_prediction"] == 1 and detail["wrong_questions"]:
-            with st.expander("❌ Farklı cevaplanan kritik soruları gör"):
-                for q in detail["wrong_questions"]:
-                    label = question_texts.get(q, q)
-                    st.write(f"- {label}: **{st.session_state.answers.get(q)}**")
-
     if st.button("⬅️ Başa Dön"):
         st.session_state.page = "form"
         st.experimental_rerun()
