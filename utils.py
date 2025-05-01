@@ -125,22 +125,36 @@ def make_predictions(
         final_pred = 1 if risk_weight_sum > nonrisk_weight_sum else 0
 
         # Soru havuzu: tüm modellerin birleşik soru listesi
+        STATIC_QUESTIONS = set([
+            'Q2','Q4','Q8','Q9','Q13','Q14','Q16','Q18','Q19','Q20','Q21','Q25','Q26','Q28','Q29',
+            'Q33','Q34','Q35','Q40','Q44','Q45','Q47','Q51','Q52','Q53','Q54','Q60','Q62','Q67',
+            'Q71','Q77','Q81','Q82','Q86','Q89','Q93','Q95','Q96','Q105','Q108','Q115','Q116',
+            'Q117','Q119','Q125','Q126','Q127','Q128','Q129','Q130','Q133','Q138','Q139','Q140',
+            'Q144','Q151','Q158','Q159','Q163','Q166','Q174','Q179','Q184','Q185','Q187','Q192',
+            'Q197','Q202','Q203','Q204','Q205','Q210','Q212','Q215','Q219','Q221','Q222','Q224',
+            'Q226','Q227','Q229','Q230','Q231','Q232','Q233','Q234','Q235','Q236','Q239','Q241',
+            'Q242','Q243','Q249','Q252','Q253'
+        ])
+        
         combined_question_pool = set()
         for model_name in model_names:
             combined_question_pool.update(feature_lists.get(model_name, []))
         
-        # Beklenenden farklı yanıtlanan sorular
         incorrect_answers_detailed = []
         for q in combined_question_pool:
+            if q not in STATIC_QUESTIONS:
+                continue
+        
             expected = expected_answers.get(q)
             given = answers.get(q)
             if expected is not None and given is not None and expected != given:
                 incorrect_answers_detailed.append({
                     "soru_kodu": q,
-                    "soru": q,  # metin app.py'de yazdırılırken eklenebilir
+                    "soru": q,
                     "beklenen": expected,
                     "verilen": given
                 })
+
         
         summary[label] = {
             "risk_weight_sum": risk_weight_sum,
