@@ -92,8 +92,7 @@ elif st.session_state.page == "results":
             st.markdown(f"### ✅ {label} - Gelişim Normale Yakın")
         
         # Yeni: Risk veren ve vermeyen model ağırlıkları
-        st.markdown(f"Risk Veren Ağırlık Toplamı: **{detail['risk_weight_sum']:.2f}**")
-        st.markdown(f"Risk Vermeyen Ağırlık Toplamı: **{detail['nonrisk_weight_sum']:.2f}**")
+        st.markdown(f"Toplam Model: **{detail['total_models']}**, Eksiklik Diyen: **{detail['total_positive']}**")
         st.markdown(f"Risk Yüzdesi: **{detail['risk_percentage']:.1f}%**")
 
         if detail["final_prediction"] == 1 and detail["wrong_questions"]:
