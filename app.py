@@ -98,6 +98,7 @@ elif st.session_state.page == "results":
         st.markdown(f"- **Risk Yüzdesi:** {emoji} **{detail['risk_percentage']:.1f}%**")
 
         if detail.get("incorrect_answers_detailed"):
+            st.write("Debug:", detail.get("incorrect_answers_detailed"))
             with st.expander("🧩 Beklenenden farklı cevaplanan sorular"):
                 for item in detail["incorrect_answers_detailed"]:
                     soru_metni = question_texts.get(item["soru_kodu"], item["soru_kodu"])
