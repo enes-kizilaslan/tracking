@@ -2,9 +2,8 @@ import os
 import joblib
 import pandas as pd
 import numpy as np
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Any
 from config import MODEL_LIST, MODEL_DIR, FEATURE_FILE, PERFORMANCE_FILE
-
 
 def load_models() -> Dict[str, Any]:
     models = {}
@@ -14,14 +13,12 @@ def load_models() -> Dict[str, Any]:
             models[model_name] = joblib.load(model_path)
     return models
 
-
 def load_feature_lists(feature_file: str = FEATURE_FILE) -> Dict[str, List[str]]:
     df = pd.read_excel(feature_file)
     return {
         row["Model"]: [q.strip() for q in str(row["Selected_Questions"]).split(",") if q.strip()]
         for _, row in df.iterrows()
     }
-
 
 def load_model_performances(performance_file: str = PERFORMANCE_FILE) -> Dict[str, float]:
     df = pd.read_excel(performance_file)
@@ -30,6 +27,9 @@ def load_model_performances(performance_file: str = PERFORMANCE_FILE) -> Dict[st
         for _, row in df.iterrows()
     }
 
+def load_expected_answers(csv_file: str = "SorularFull.csv") -> Dict[str, str]:
+    df = pd.read_csv(csv_file)
+    return dict(zip(df["SoruNo"], df["Beklenen Cevap"]))
 
 def prepare_input_data(answers: Dict[str, str], feature_lists: Dict[str, List[str]]) -> Dict[str, np.ndarray]:
     input_data = {}
@@ -40,18 +40,17 @@ def prepare_input_data(answers: Dict[str, str], feature_lists: Dict[str, List[st
         input_data[model_name] = np.array(row).reshape(1, -1)
     return input_data
 
-
 def make_predictions(
     models: Dict[str, Any],
     input_data: Dict[str, np.ndarray],
     performances: Dict[str, float],
     feature_lists: Dict[str, List[str]],
-    answers: Dict[str, str]
+    answers: Dict[str, str],
+    expected_answers: Dict[str, str]
 ) -> Dict[str, Dict[str, Any]]:
 
     summary = {}
 
-    # Gelişimsel beceriler ve hastalık isimleri
     groups = {
         'Sosyal': [],
         'Duyusal': [],
@@ -66,7 +65,6 @@ def make_predictions(
         'Zihinsel Yetersizlik': []
     }
 
-    # Gruplandırma
     for model_name in models:
         for key in groups:
             if model_name.endswith(key):
@@ -82,17 +80,19 @@ def make_predictions(
             X = input_data.get(model_name)
             if X is None:
                 continue
-            y_pred = model.predict_proba(X)[0][1]  # Pozitif sınıf olasılığı
+            y_pred = model.predict_proba(X)[0][1]
             binary_pred = 1 if y_pred >= 0.5 else 0
             weight = performances.get(model_name, 1.0)
 
             predictions.append(binary_pred * weight)
             weights.append(weight)
 
-            # Açıklanabilirlik: yanlış soruları tespit et
             used_questions = feature_lists.get(model_name, [])
-            wrong_questions = [q for q in used_questions if answers.get(q) != "Evet"]  # Beklenen cevap "Evet" varsayılıyor
-            if binary_pred == 1:  # Eksiklik varsa sadece anlamlı
+            wrong_questions = [
+                q for q in used_questions
+                if q in expected_answers and answers.get(q) != expected_answers[q]
+            ]
+            if binary_pred == 1:
                 all_wrong_questions.extend(wrong_questions)
 
         if weights:
@@ -110,3 +110,4 @@ def make_predictions(
             }
 
     return summary
+
