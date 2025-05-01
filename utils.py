@@ -134,7 +134,7 @@ def make_predictions(
         for q in combined_question_pool:
             expected = expected_answers.get(q)
             given = answers.get(q)
-            if expected and given and expected != given:
+            if expected is not None and given is not None and expected != given:
                 incorrect_answers_detailed.append({
                     "soru_kodu": q,
                     "soru": q,  # metin app.py'de yazdırılırken eklenebilir
