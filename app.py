@@ -96,6 +96,8 @@ elif st.session_state.page == "results":
         st.markdown(f"- **Toplam Model Sayısı:** {detail['total_models']}")
         st.markdown(f"- **Eksiklik Diyen Model Sayısı:** {detail['total_positive']}")
         st.markdown(f"- **Risk Yüzdesi:** {emoji} **{detail['risk_percentage']:.1f}%**")
+        st.markdown(f"- **Toplam Soru Sayısı:** {detail['total_question_count']}")
+        st.markdown(f"- **Yanlış Cevaplanan Soru Sayısı:** {detail['incorrect_count']}")
 
         if detail.get("incorrect_answers_detailed"):
             with st.expander("🧩 Beklenenden farklı cevaplanan sorular"):
