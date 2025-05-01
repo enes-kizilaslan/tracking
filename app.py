@@ -41,17 +41,17 @@ if st.session_state.page == "form":
         for q in questions:
             st.session_state[q] = random.choice(["Evet", "Hayır"])
 
-with st.form("questionnaire"):
-    answers = {}
-    for q in questions:
-        label = question_texts.get(q, q)  # Eğer metin bulunamazsa Qxx göster
-        answers[q] = st.radio(
-            label,
-            ["Evet", "Hayır"],
-            key=q,
-            index=0 if st.session_state.get(q) == "Evet" else 1
-        )
-    submit = st.form_submit_button("Tahmin Yap")
+    with st.form("questionnaire"):
+        answers = {}
+        for q in questions:
+            label = question_texts.get(q, q)  # Eğer metin bulunamazsa Qxx göster
+            answers[q] = st.radio(
+                label,
+                ["Evet", "Hayır"],
+                key=q,
+                index=0 if st.session_state.get(q) == "Evet" else 1
+            )
+        submit = st.form_submit_button("Tahmin Yap")
 
     if submit:
         st.session_state.answers = answers
