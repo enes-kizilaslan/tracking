@@ -46,8 +46,9 @@ def load_question_texts_local():
         escapechar='\\'
     )
     df.columns = df.columns.str.strip().str.replace('"', '').str.lower()
-    df = df[df["soru no"].isin(get_static_questions())]  # ← SADECE 95 soruyu filtrele
-    return dict(zip(df["soru no"], df["soru"]))
+    
+    # Sıra numaralarını Q etiketine çevirerek eşle
+    return {f"Q{idx+1}": row["soru"] for idx, row in df.iterrows()}
 
 question_texts = load_question_texts_local()
 
