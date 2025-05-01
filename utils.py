@@ -1,79 +1,124 @@
-import streamlit as st
-import random
+import os
+import joblib
 import pandas as pd
+import numpy as np
+import csv
+from typing import Dict, List, Any
+from config import MODEL_LIST, MODEL_DIR, FEATURE_FILE, PERFORMANCE_FILE
 
-# Sabit 95 soruluk liste
-def get_static_questions():
-    return [
-        'Q2','Q4','Q8','Q9','Q13','Q14','Q16','Q18','Q19','Q20','Q21','Q25','Q26','Q28','Q29',
-        'Q33','Q34','Q35','Q40','Q44','Q45','Q47','Q51','Q52','Q53','Q54','Q60','Q62','Q67',
-        'Q71','Q77','Q81','Q82','Q86','Q89','Q93','Q95','Q96','Q105','Q108','Q115','Q116',
-        'Q117','Q119','Q125','Q126','Q127','Q128','Q129','Q130','Q133','Q138','Q139','Q140',
-        'Q144','Q151','Q158','Q159','Q163','Q166','Q174','Q179','Q184','Q185','Q187','Q192',
-        'Q197','Q202','Q203','Q204','Q205','Q210','Q212','Q215','Q219','Q221','Q222','Q224',
-        'Q226','Q227','Q229','Q230','Q231','Q232','Q233','Q234','Q235','Q236','Q239','Q241',
-        'Q242','Q243','Q249','Q252','Q253'
-    ]
+def load_models() -> Dict[str, Any]:
+    models = {}
+    for model_name in MODEL_LIST:
+        model_path = os.path.join(MODEL_DIR, f"{model_name}.pkl")
+        if os.path.exists(model_path):
+            models[model_name] = joblib.load(model_path)
+    return models
 
-# Sayfa yapısı
-st.set_page_config(page_title="Nörogelişimsel Bozukluk Tahmin Sistemi", layout="wide")
-st.title("Nörogelişimsel Bozukluk Tahmin Sistemi")
 
-if "page" not in st.session_state:
-    st.session_state.page = "form"
+def load_feature_lists(feature_file: str = FEATURE_FILE) -> Dict[str, List[str]]:
+    df = pd.read_excel(feature_file)
+    return {
+        row["Model"]: [q.strip() for q in str(row["Selected_Questions"]).split(",") if q.strip()]
+        for _, row in df.iterrows()
+    }
 
-questions = get_static_questions()
+def load_model_performances(performance_file: str = PERFORMANCE_FILE) -> Dict[str, float]:
+    df = pd.read_excel(performance_file)
+    return {
+        row["Model"]: (row.get("Train_F1", 0) + row.get("Test_F1", 0)) / 2
+        for _, row in df.iterrows()
+    }
 
-if st.session_state.page == "form":
-    st.subheader("Lütfen aşağıdaki 95 soruyu cevaplayın")
+def load_expected_answers(csv_file: str = "SorularFull.csv") -> Dict[str, str]:
+    df = pd.read_csv(
+        csv_file,
+        sep=';',
+        encoding='windows-1254',
+        engine='python',
+        quoting=csv.QUOTE_NONE,
+        quotechar=None,
+        escapechar='\\'
+    )
+    df.columns = df.columns.str.strip().str.replace('"', '')  # Çift tırnak ve boşlukları temizle
+    return dict(zip(df["Soru no"], df["Sağlıklı Çocukta Beklenen Cevap"]))
 
-    if st.button("Rastgele Doldur"):
-        for q in questions:
-            st.session_state[q] = random.choice(["Evet", "Hayır"])
+def prepare_input_data(answers: Dict[str, str], feature_lists: Dict[str, List[str]]) -> Dict[str, np.ndarray]:
+    input_data = {}
+    for model_name, features in feature_lists.items():
+        row = []
+        for f in features:
+            row.append(1 if answers.get(f) == "Evet" else 0)
+        input_data[model_name] = np.array(row).reshape(1, -1)
+    return input_data
 
-    with st.form("questionnaire"):
-        answers = {}
-        for q in questions:
-            label = question_texts.get(q, q)  # Eğer metin bulunamazsa Qxx göster
-            answers[q] = st.radio(
-                label,
-                ["Evet", "Hayır"],
-                key=q,
-                index=0 if st.session_state.get(q) == "Evet" else 1
-            )
-        submit = st.form_submit_button("Tahmin Yap")
+def make_predictions(
+    models: Dict[str, Any],
+    input_data: Dict[str, np.ndarray],
+    performances: Dict[str, float],
+    feature_lists: Dict[str, List[str]],
+    answers: Dict[str, str],
+    expected_answers: Dict[str, str]
+) -> Dict[str, Dict[str, Any]]:
 
-    if submit:
-        st.session_state.answers = answers
-        st.session_state.page = "results"
-        st.experimental_rerun()
+    summary = {}
 
-elif st.session_state.page == "results":
-    st.subheader("Cevaplarınız analiz ediliyor...")
-    with st.spinner("Lütfen bekleyin. Tahmin yapılıyor..."):
-        models = load_models()
-        feature_lists = load_feature_lists()
-        performances = load_model_performances()
-        expected_answers = load_expected_answers()
-        input_data = prepare_input_data(st.session_state.answers, feature_lists)
-        results = make_predictions(models, input_data, performances, feature_lists, st.session_state.answers, expected_answers)
+    groups = {
+        'Sosyal': [],
+        'Duyusal': [],
+        'Motor': [],
+        'Dil': [],
+        'Iletisim': [],  # ← düzeltildi
+        'Ortak_Dikkat': [],
+        'Otizm': [],
+        'DEHB': [],
+        'Dil ve Konuşma Bozuklukları': [],
+        'Gelişimsel Koordinasyon Bozukluğu': [],
+        'Zihinsel Yetersizlik': []
+    }
 
-    st.subheader("Tahmin Sonuçları")
 
-    for label, detail in results.items():
-        if detail["final_prediction"] == 1:
-            st.markdown(f"### 📈 {label} - Eksiklik/Gelişimsel Risk Var")
-        else:
-            st.markdown(f"### ✅ {label} - Gelişim Normale Yakın")
+    for model_name in models:
+        for key in groups:
+            if model_name.endswith(key):
+                groups[key].append(model_name)
 
-        st.markdown(f"Toplam Model: **{detail['total_models']}**, Eksiklik Diyen: **{detail['total_positive']}**")
-        st.markdown(f"Ağırlıklı Risk Skoru: **{detail['weighted_score']:.2f}**")
+    for label, model_names in groups.items():
+        predictions = []
+        weights = []
+        all_wrong_questions = []
 
-        if detail["final_prediction"] == 1 and detail["wrong_questions"]:
-            with st.expander("❌ Farklı cevaplanan kritik soruları gör"):
-                for q in detail["wrong_questions"]:
-                    st.write(f"- {q}: **{st.session_state.answers.get(q)}**")
+        for model_name in model_names:
+            model = models[model_name]
+            X = input_data.get(model_name)
+            if X is None:
+                continue
+            y_pred = model.predict_proba(X)[0][1]
+            binary_pred = 1 if y_pred >= 0.5 else 0
+            weight = performances.get(model_name, 1.0)
 
-    if st.button("⬅️ Başa Dön"):
-        st.session_state.page = "form"
-        st.experimental_rerun()
+            predictions.append(binary_pred * weight)
+            weights.append(weight)
+
+            used_questions = feature_lists.get(model_name, [])
+            wrong_questions = [
+                q for q in used_questions
+                if q in expected_answers and answers.get(q) != expected_answers[q]
+            ]
+            if binary_pred == 1:
+                all_wrong_questions.extend(wrong_questions)
+
+        if weights:
+            weighted_score = sum(predictions) / sum(weights)
+            total_models = len(weights)
+            total_positive = sum([1 for p in predictions if p > 0])
+            final_pred = 1 if weighted_score >= 0.5 else 0
+
+            summary[label] = {
+                "total_models": total_models,
+                "total_positive": total_positive,
+                "final_prediction": final_pred,
+                "weighted_score": weighted_score,
+                "wrong_questions": list(set(all_wrong_questions))
+            }
+
+    return summary
