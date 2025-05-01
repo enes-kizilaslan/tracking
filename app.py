@@ -93,6 +93,7 @@ elif st.session_state.page == "results":
 
         st.markdown(f"Toplam Model: **{detail['total_models']}**, Eksiklik Diyen: **{detail['total_positive']}**")
         st.markdown(f"Ağırlıklı Risk Skoru: **{detail['weighted_score']:.2f}**")
+        st.markdown(f"Risk Yüzdesi: **{detail['risk_percentage']:.1f}%**")
 
         if detail["final_prediction"] == 1 and detail["wrong_questions"]:
             with st.expander("❌ Farklı cevaplanan kritik soruları gör"):
