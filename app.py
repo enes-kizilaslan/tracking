@@ -32,7 +32,21 @@ if "page" not in st.session_state:
     st.session_state.page = "form"
 
 questions = get_static_questions()
-question_texts = load_question_texts()
+
+# Soru metinlerini yükle (uyumlu kolon isimleri ile)
+def load_question_texts_local():
+    df = pd.read_csv(
+        "SorularFull.csv",
+        sep=';',
+        encoding='windows-1254',
+        engine='python',
+        quoting=3,
+        quotechar=None,
+        escapechar='\\'
+    )
+    return dict(zip(df["Soru no"], df["Soru"]))
+
+question_texts = load_question_texts_local()
 
 if st.session_state.page == "form":
     st.subheader("Lütfen aşağıdaki 95 soruyu cevaplayın")
