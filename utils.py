@@ -59,6 +59,11 @@ def make_predictions(
     answers: Dict[str, str],
     expected_answers: Dict[str, str]
 ) -> Dict[str, Dict[str, Any]]:
+    print("Toplam expected_answers sayısı:", len(expected_answers))
+    print("🧪 DEBUG – answers örnekleri:")
+    for k in list(answers.keys())[:10]:
+        print(f"{k}: {answers[k]}")
+
     """
     Her bir grup için risk veren ve vermeyen modellerin ağırlıklı toplamlarını hesaplar,
     risk yüzdesini (örneğin %65) ve final kararı (riskli veya risksiz) verir.
