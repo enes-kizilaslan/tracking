@@ -59,15 +59,20 @@ def make_predictions(
     answers: Dict[str, str],
     expected_answers: Dict[str, str]
 ) -> Dict[str, Dict[str, Any]]:
-
+    """
+    Her bir grup için risk veren ve vermeyen modellerin ağırlıklı toplamlarını hesaplar,
+    risk yüzdesini (örneğin %65) ve final kararı (riskli veya risksiz) verir.
+    Ayrıca, açıklanabilirlik için, modelde kullanılan sorulardan beklenen cevaptan farklı olanları listeler.
+    """
     summary = {}
 
+    # Gruplama: her hastalık/beceri için ilgili modelleri belirliyoruz.
     groups = {
         'Sosyal': [],
         'Duyusal': [],
         'Motor': [],
         'Dil': [],
-        'Iletisim': [],  # ← düzeltildi
+        'Iletisim': [],
         'Ortak_Dikkat': [],
         'Otizm': [],
         'DEHB': [],
@@ -76,49 +81,56 @@ def make_predictions(
         'Zihinsel Yetersizlik': []
     }
 
-
     for model_name in models:
         for key in groups:
             if model_name.endswith(key):
                 groups[key].append(model_name)
 
     for label, model_names in groups.items():
-        predictions = []
-        weights = []
-        all_wrong_questions = []
+        risk_weight_sum = 0.0      # Risk veren modellerin ağırlık toplamı
+        nonrisk_weight_sum = 0.0   # Risk vermeyen modellerin ağırlık toplamı
+        wrong_questions_all = []   # Açıklama için hatalı cevaplanan sorular
 
         for model_name in model_names:
             model = models[model_name]
             X = input_data.get(model_name)
             if X is None:
                 continue
-            y_pred = model.predict_proba(X)[0][1]
-            binary_pred = 1 if y_pred >= 0.5 else 0
+
+            # Modelin risk olasılığı
+            proba = model.predict_proba(X)[0][1]
+            # Basit eşik: 0.5 üzerinde risk, altındaysa risksiz
+            binary_pred = 1 if proba >= 0.5 else 0
+            # Modelin ağırlığı: train ve test F1 skorlarının ortalaması (performances üzerinden)
             weight = performances.get(model_name, 1.0)
 
-            predictions.append(binary_pred * weight)
-            weights.append(weight)
-
-            used_questions = feature_lists.get(model_name, [])
-            wrong_questions = [
-                q for q in used_questions
-                if q in expected_answers and answers.get(q) != expected_answers[q]
-            ]
             if binary_pred == 1:
-                all_wrong_questions.extend(wrong_questions)
+                risk_weight_sum += weight
 
-        if weights:
-            weighted_score = sum(predictions) / sum(weights)
-            total_models = len(weights)
-            total_positive = sum([1 for p in predictions if p > 0])
-            final_pred = 1 if weighted_score >= 0.5 else 0
+                # Modelin kullandığı sorular arasında, beklenen cevap ile farklı cevaplanmış olanları topla.
+                used_questions = feature_lists.get(model_name, [])
+                wrong_questions = [
+                    q for q in used_questions
+                    if q in expected_answers and answers.get(q) != expected_answers[q]
+                ]
+                wrong_questions_all.extend(wrong_questions)
+            else:
+                nonrisk_weight_sum += weight
 
-            summary[label] = {
-                "total_models": total_models,
-                "total_positive": total_positive,
-                "final_prediction": final_pred,
-                "weighted_score": weighted_score,
-                "wrong_questions": list(set(all_wrong_questions))
-            }
+        total_weight = risk_weight_sum + nonrisk_weight_sum
+        # İki ağırlık toplamı üzerinden risk yüzdesini hesapla
+        risk_percentage = (risk_weight_sum / total_weight * 100) if total_weight > 0 else 0
+
+        # Final karar: risk veren modellerin ağırlığı daha yüksekse, riskli olarak belirle.
+        final_pred = 1 if risk_weight_sum > nonrisk_weight_sum else 0
+
+        summary[label] = {
+            "risk_weight_sum": risk_weight_sum,
+            "nonrisk_weight_sum": nonrisk_weight_sum,
+            "risk_percentage": risk_percentage,
+            "final_prediction": final_pred,
+            "wrong_questions": list(set(wrong_questions_all))  # Aynı sorunun tekrar etmemesi için set kullanıldı.
+        }
 
     return summary
+
