@@ -46,7 +46,7 @@ def load_question_texts_local():
         escapechar='\\'
     )
     df.columns = df.columns.str.strip().str.replace('"', '').str.lower()
-    return dict(zip(df["soru no"], df["soru"]))
+    return df["soru"]
 
 
 question_texts = load_question_texts_local()
