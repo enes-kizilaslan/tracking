@@ -35,6 +35,18 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# 🔐 Sabit 95 soru listesi
+questions = [
+    'Q2','Q4','Q8','Q9','Q13','Q14','Q16','Q18','Q19','Q20','Q21','Q25','Q26','Q28','Q29',
+    'Q33','Q34','Q35','Q40','Q44','Q45','Q47','Q51','Q52','Q53','Q54','Q60','Q62','Q67',
+    'Q71','Q77','Q81','Q82','Q86','Q89','Q93','Q95','Q96','Q105','Q108','Q115','Q116',
+    'Q117','Q119','Q125','Q126','Q127','Q128','Q129','Q130','Q133','Q138','Q139','Q140',
+    'Q144','Q151','Q158','Q159','Q163','Q166','Q174','Q179','Q184','Q185','Q187','Q192',
+    'Q197','Q202','Q203','Q204','Q205','Q210','Q212','Q215','Q219','Q221','Q222','Q224',
+    'Q226','Q227','Q229','Q230','Q231','Q232','Q233','Q234','Q235','Q236','Q239','Q241',
+    'Q242','Q243','Q249','Q252','Q253'
+]
+
 def main():
     st.title("Nörogelişimsel Bozukluk Tahmin Sistemi")
     
@@ -43,12 +55,6 @@ def main():
         models = load_models()
         feature_lists = load_feature_lists()
         model_performances = load_model_performances()
-
-        # Tüm unique soruları belirle
-        all_selected_questions = set()
-        for features in feature_lists.values():
-            all_selected_questions.update(features)
-        questions = sorted(list(all_selected_questions))  # 95 unique soru
 
         # Rastgele Doldur butonu (form dışında)
         if st.button("Rastgele Doldur"):
@@ -79,7 +85,6 @@ def main():
             
             st.subheader("Tahmin Sonuçları:")
             
-            # Sonuçları risk seviyelerine göre sınıflandır ve göster
             for condition, prob in predictions.items():
                 prob_percentage = prob * 100
                 if prob_percentage >= 70:
