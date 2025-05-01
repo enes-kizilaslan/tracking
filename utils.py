@@ -61,7 +61,10 @@ def load_model_performances(performance_file: str = PERFORMANCE_FILE) -> Dict[st
     
     for _, row in df.iterrows():
         model_name = row['Model']
-        performances[model_name] = row['F1_Score']
+        train_f1 = row.get('Train_F1', 0)
+        test_f1 = row.get('Test_F1', 0)
+        mean_f1 = (train_f1 + test_f1) / 2
+        performances[model_name] = mean_f1
     
     return performances
 
