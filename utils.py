@@ -2,6 +2,7 @@ import os
 import joblib
 import pandas as pd
 import numpy as np
+import csv
 from typing import Dict, List, Any
 from config import MODEL_LIST, MODEL_DIR, FEATURE_FILE, PERFORMANCE_FILE
 
@@ -28,7 +29,15 @@ def load_model_performances(performance_file: str = PERFORMANCE_FILE) -> Dict[st
     }
 
 def load_expected_answers(csv_file: str = "SorularFull.csv") -> Dict[str, str]:
-    df = pd.read_csv(csv_file)
+    df = pd.read_csv(
+        csv_file,
+        sep=';',
+        encoding='windows-1254',
+        engine='python',
+        quoting=csv.QUOTE_NONE,
+        quotechar=None,
+        escapechar='\\'
+    )
     return dict(zip(df["SoruNo"], df["Beklenen Cevap"]))
 
 def prepare_input_data(answers: Dict[str, str], feature_lists: Dict[str, List[str]]) -> Dict[str, np.ndarray]:
