@@ -41,7 +41,7 @@ if st.session_state.page == "form":
         for q in questions:
             st.session_state[q] = random.choice(["Evet", "Hayır"])
 
-    with st.form("questionnaire"):
+with st.form("questionnaire"):
     answers = {}
     for q in questions:
         label = question_texts.get(q, q)  # Eğer metin bulunamazsa Qxx göster
