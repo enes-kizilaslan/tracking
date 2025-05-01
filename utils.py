@@ -48,7 +48,7 @@ def load_feature_lists(feature_file: str = FEATURE_FILE) -> Dict[str, List[str]]
     df = pd.read_excel(feature_file, sheet_name=None)
     
     for sheet_name in df.keys():
-        feature_lists[sheet_name] = df[sheet_name]['Features'].tolist()
+        feature_lists[sheet_name] = df[sheet_name]['Selected_Questions'].tolist()
     
     return feature_lists
 
