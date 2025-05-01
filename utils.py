@@ -49,7 +49,7 @@ def load_feature_lists(feature_file: str = FEATURE_FILE) -> Dict[str, List[str]]
     
     for sheet_name, sheet_df in df.items():
         features = []
-        for item in sheet_df['Features'].dropna():
+        for item in sheet_df['Selected_Questions'].dropna():
             parts = [q.strip() for q in str(item).split(',')]
             features.extend(parts)
         feature_lists[sheet_name] = features
