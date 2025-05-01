@@ -33,7 +33,6 @@ if "page" not in st.session_state:
 questions = get_static_questions()
 
 # Soru metinlerini yükle
-
 @st.cache_data
 def load_question_texts_local():
     df = pd.read_csv(
@@ -46,9 +45,7 @@ def load_question_texts_local():
         escapechar='\\'
     )
     df.columns = df.columns.str.strip().str.replace('"', '').str.lower()
-    
-    # Sıra numaralarını Q etiketine çevirerek eşle
-    return {f"Q{idx+1}": row["soru"] for idx, row in df.iterrows()}
+    return {f"Q{idx+1}": row["soru"] for idx, row in df.iterrows() if f"Q{idx+1}" in questions}
 
 question_texts = load_question_texts_local()
 
