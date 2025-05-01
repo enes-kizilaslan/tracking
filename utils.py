@@ -66,7 +66,7 @@ def make_predictions(
         'Duyusal': [],
         'Motor': [],
         'Dil': [],
-        'İletişim': [],
+        'Iletisim': [],  # ← düzeltildi
         'Ortak_Dikkat': [],
         'Otizm': [],
         'DEHB': [],
@@ -74,6 +74,7 @@ def make_predictions(
         'Gelişimsel Koordinasyon Bozukluğu': [],
         'Zihinsel Yetersizlik': []
     }
+
 
     for model_name in models:
         for key in groups:
