@@ -38,7 +38,7 @@ def load_expected_answers(csv_file: str = "SorularFull.csv") -> Dict[str, str]:
         quotechar=None,
         escapechar='\\'
     )
-    return dict(zip(df["SoruNo"], df["Beklenen Cevap"]))
+    return dict(zip(df["SoruNo"], df["Sağlıklı Çocukta Beklenen Cevap"]))
 
 def prepare_input_data(answers: Dict[str, str], feature_lists: Dict[str, List[str]]) -> Dict[str, np.ndarray]:
     input_data = {}
