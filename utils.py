@@ -42,15 +42,20 @@ def load_models() -> Dict[str, Any]:
 
 def load_feature_lists(feature_file: str = FEATURE_FILE) -> Dict[str, List[str]]:
     """
-    Excel dosyasından özellik listelerini yükler
+    Excel dosyasından özellik listelerini yükler, virgülle ayrılmış hücreleri ayıklar
     """
     feature_lists = {}
     df = pd.read_excel(feature_file, sheet_name=None)
     
-    for sheet_name in df.keys():
-        feature_lists[sheet_name] = df[sheet_name]['Selected_Questions'].tolist()
+    for sheet_name, sheet_df in df.items():
+        features = []
+        for item in sheet_df['Features'].dropna():
+            parts = [q.strip() for q in str(item).split(',')]
+            features.extend(parts)
+        feature_lists[sheet_name] = features
     
     return feature_lists
+
 
 def load_model_performances(performance_file: str = PERFORMANCE_FILE) -> Dict[str, float]:
     """
