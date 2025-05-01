@@ -87,13 +87,22 @@ elif st.session_state.page == "results":
 
     for label, detail in results.items():
         if detail["final_prediction"] == 1:
-            st.markdown(f"### 📈 {label} - Eksiklik/Gelişimsel Risk Var")
+            st.markdown(f"---\n### 📈 **{label}** – Eksiklik/Gelişimsel Risk Var")
+            emoji = "🔴"
         else:
-            st.markdown(f"### ✅ {label} - Gelişim Normale Yakın")
-        
-        # Yeni: Risk veren ve vermeyen model ağırlıkları
-        st.markdown(f"Toplam Model: **{detail['total_models']}**, Eksiklik Diyen: **{detail['total_positive']}**")
-        st.markdown(f"Risk Yüzdesi: **{detail['risk_percentage']:.1f}%**")
+            st.markdown(f"---\n### ✅ **{label}** – Gelişim Normale Yakın")
+            emoji = "🟢"
+    
+        st.markdown(f"- **Toplam Model Sayısı:** {detail['total_models']}")
+        st.markdown(f"- **Eksiklik Diyen Model Sayısı:** {detail['total_positive']}")
+        st.markdown(f"- **Risk Yüzdesi:** {emoji} **{detail['risk_percentage']:.1f}%**")
+
+        if detail.get("incorrect_answers_detailed"):
+            with st.expander("🧩 Beklenenden farklı cevaplanan sorular"):
+                for item in detail["incorrect_answers_detailed"]:
+                    soru_metni = question_texts.get(item["soru_kodu"], item["soru_kodu"])
+                    st.markdown(f"- **{soru_metni}**  \n"
+                                f"Beklenen: `{item['beklenen']}` | Verilen: `{item['verilen']}`")
 
         if detail["final_prediction"] == 1 and detail["wrong_questions"]:
             with st.expander("❌ Farklı cevaplanan kritik soruları gör"):
