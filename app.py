@@ -6,7 +6,8 @@ from utils import (
     load_feature_lists,
     load_model_performances,
     prepare_input_data,
-    make_predictions
+    make_predictions,
+    load_expected_answers
 )
 
 # Sabit 95 soruluk liste
@@ -54,8 +55,9 @@ elif st.session_state.page == "results":
         models = load_models()
         feature_lists = load_feature_lists()
         performances = load_model_performances()
+        expected_answers = load_expected_answers()
         input_data = prepare_input_data(st.session_state.answers, feature_lists)
-        results = make_predictions(models, input_data, performances, feature_lists, st.session_state.answers)
+        results = make_predictions(models, input_data, performances, feature_lists, st.session_state.answers, expected_answers)
 
     st.subheader("Tahmin Sonuçları")
 
@@ -76,4 +78,3 @@ elif st.session_state.page == "results":
     if st.button("⬅️ Başa Dön"):
         st.session_state.page = "form"
         st.experimental_rerun()
-
