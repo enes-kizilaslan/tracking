@@ -124,6 +124,24 @@ def make_predictions(
         # Final karar: risk veren modellerin ağırlığı daha yüksekse, riskli olarak belirle.
         final_pred = 1 if risk_weight_sum > nonrisk_weight_sum else 0
 
+        # Soru havuzu: tüm modellerin birleşik soru listesi
+        combined_question_pool = set()
+        for model_name in model_names:
+            combined_question_pool.update(feature_lists.get(model_name, []))
+        
+        # Beklenenden farklı yanıtlanan sorular
+        incorrect_answers_detailed = []
+        for q in combined_question_pool:
+            expected = expected_answers.get(q)
+            given = answers.get(q)
+            if expected and given and expected != given:
+                incorrect_answers_detailed.append({
+                    "soru_kodu": q,
+                    "soru": q,  # metin app.py'de yazdırılırken eklenebilir
+                    "beklenen": expected,
+                    "verilen": given
+                })
+        
         summary[label] = {
             "risk_weight_sum": risk_weight_sum,
             "nonrisk_weight_sum": nonrisk_weight_sum,
@@ -133,7 +151,8 @@ def make_predictions(
             "total_models": len(model_names),
             "total_positive": sum(1 for model_name in model_names
                                   if model_name in input_data and
-                                     models[model_name].predict_proba(input_data[model_name])[0][1] >= 0.5)
+                                     models[model_name].predict_proba(input_data[model_name])[0][1] >= 0.5),
+            "incorrect_answers_detailed": incorrect_answers_detailed
         }
 
     return summary
