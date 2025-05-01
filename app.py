@@ -31,7 +31,6 @@ if "page" not in st.session_state:
     st.session_state.page = "form"
 
 questions = get_static_questions()
-question_texts = load_question_texts()
 
 if st.session_state.page == "form":
     st.subheader("Lütfen aşağıdaki 95 soruyu cevaplayın")
