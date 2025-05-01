@@ -33,6 +33,7 @@ if "page" not in st.session_state:
 questions = get_static_questions()
 
 # Soru metinlerini yükle
+
 @st.cache_data
 def load_question_texts_local():
     df = pd.read_csv(
@@ -44,12 +45,9 @@ def load_question_texts_local():
         quotechar=None,
         escapechar='\\'
     )
-    df.columns = df.columns.str.strip().str.replace('"', '')
-    # Kolon isimlerini doğrula
-    column_names = [col.lower().strip() for col in df.columns]
-    question_col = next((col for col in df.columns if "soru" in col.lower() and "no" in col.lower()), "")
-    text_col = next((col for col in df.columns if col.lower().strip() == "soru"), "")
-    return dict(zip(df[question_col], df[text_col]))
+    df.columns = df.columns.str.strip().str.replace('"', '').str.lower()
+    return dict(zip(df["soru no"], df["soru"]))
+
 
 question_texts = load_question_texts_local()
 
