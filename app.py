@@ -78,7 +78,7 @@ def main():
         
         if submit_button:
             # Kullanıcı cevaplarını hazırla
-            input_data = prepare_input_data(answers)
+            input_data = prepare_input_data(answers, feature_lists)
             
             # Tahminleri yap
             predictions = make_predictions(models, input_data, model_performances)
