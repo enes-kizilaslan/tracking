@@ -51,7 +51,7 @@ if st.session_state.page == "form":
             key=q,
             index=0 if st.session_state.get(q) == "Evet" else 1
         )
-        submit = st.form_submit_button("Tahmin Yap")
+    submit = st.form_submit_button("Tahmin Yap")
 
     if submit:
         st.session_state.answers = answers
