@@ -7,7 +7,8 @@ from utils import (
     load_model_performances,
     prepare_input_data,
     make_predictions,
-    load_expected_answers
+    load_expected_answers,
+    load_question_texts
 )
 
 # Sabit 95 soruluk liste
@@ -31,6 +32,7 @@ if "page" not in st.session_state:
     st.session_state.page = "form"
 
 questions = get_static_questions()
+question_texts = load_question_texts()
 
 if st.session_state.page == "form":
     st.subheader("Lütfen aşağıdaki 95 soruyu cevaplayın")
@@ -40,9 +42,15 @@ if st.session_state.page == "form":
             st.session_state[q] = random.choice(["Evet", "Hayır"])
 
     with st.form("questionnaire"):
-        answers = {}
-        for q in questions:
-            answers[q] = st.radio(q, ["Evet", "Hayır"], key=q, index=0 if st.session_state.get(q) == "Evet" else 1)
+    answers = {}
+    for q in questions:
+        label = question_texts.get(q, q)  # Eğer metin bulunamazsa Qxx göster
+        answers[q] = st.radio(
+            label,
+            ["Evet", "Hayır"],
+            key=q,
+            index=0 if st.session_state.get(q) == "Evet" else 1
+        )
         submit = st.form_submit_button("Tahmin Yap")
 
     if submit:
