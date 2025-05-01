@@ -45,7 +45,11 @@ def load_question_texts_local():
         escapechar='\\'
     )
     df.columns = df.columns.str.strip().str.replace('"', '')
-    return dict(zip(df["Soru no"], df["Soru"]))
+    # Kolon isimlerini doğrula
+    column_names = [col.lower().strip() for col in df.columns]
+    question_col = next((col for col in df.columns if "soru" in col.lower() and "no" in col.lower()), "")
+    text_col = next((col for col in df.columns if col.lower().strip() == "soru"), "")
+    return dict(zip(df[question_col], df[text_col]))
 
 question_texts = load_question_texts_local()
 
